@@ -1,0 +1,11 @@
+target/
+
+# Intellij
+.idea/
+!.idea/copyright/
+!.idea/copyright/*.xml
+*.iml
+*.iws
+
+# Mac
+.DS_Store
