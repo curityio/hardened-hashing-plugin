@@ -32,7 +32,7 @@ jobs:
 
       - name: Build plugin artifacts zip
         run: |
-          zip --junk-paths plugin-artifacts target/libs/*.jar
+          zip --junk-paths plugin-artifacts target/*.jar
 
       - name: Upload plugin artifacts
         uses: actions/upload-artifact@v4
