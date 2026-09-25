@@ -70,6 +70,23 @@ A Password Transformer can be used as the main Credential Manager algorithm and
 as a source for credential rehashing, in any combination. This makes it possible
 to migrate stored hashes both onto and off a plugin-provided algorithm.
 
+.. warning::
+
+    When credentials are stored using the JDBC Plugin, the ``password`` column of the ``credentials`` table
+    must be updated to support longer hashes before using this plugin. The default database schema defines
+    that column as::
+
+        password    VARCHAR(128) NOT NULL
+
+    Hashes are stored in the PHC string format, with the salt and the hash Base64-encoded, so their length
+    grows with the configured ``salt-length`` and ``hash-length``. With the default settings, an ``argon2id``
+    hash is about 100 characters long, but with the maximum allowed settings a hash can take up to about
+    2800 characters. Widen the column accordingly, for example, in PostgreSQL::
+
+        ALTER TABLE credentials ALTER COLUMN password TYPE VARCHAR(4096);
+
+    The exact syntax depends on the database in use.
+
 Argon2 Settings
 ~~~~~~~~~~~~~~~
 
