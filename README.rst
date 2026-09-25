@@ -22,7 +22,9 @@ It also provides ``scrypt``, defined in
 `RFC 7914 <https://www.rfc-editor.org/rfc/rfc7914.html>`_.
 
 Password hashes are stored in the standard
-`PHC string format <https://c2sp.org/phc-strings>`_, for example::
+`PHC string format <https://c2sp.org/phc-strings>`_, for example:
+
+.. code-block:: text
 
     $argon2id$v=19$m=65536,t=3,p=1$<salt>$<hash>
     $scrypt$ln=17,r=8,p=1$<salt>$<hash>
