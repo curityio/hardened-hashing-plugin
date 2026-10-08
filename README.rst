@@ -1,51 +1,50 @@
 Hardened Hashing Password Transformer Plugin
 ============================================
 
-The hardened-hashing plugin is a Kotlin-based Password Transformer plugin for the
-Curity Identity Server. It adds memory-hard password hashing algorithms that can be
-configured as Password Transformers and then selected by Credential Managers or
-used from credential transformation procedures.
+.. image:: https://img.shields.io/badge/quality-production-green
+    :target: https://curity.io/resources/code-examples/status/
 
-Repository: https://github.com/curityio/hardened-hashing-plugin
+.. image:: https://img.shields.io/badge/availability-binary-blue
+    :target: https://curity.io/resources/code-examples/status/
+
+The Hardened Hashing Password Transformer plugin is a Kotlin-based Password Transformer plugin for the
+Curity Identity Server. It adds memory-hard password hashing algorithms that an administrator can configure as
+Password Transformers and then select for a Credential Manager or use from credential transformation procedures.
 
 Supported Algorithms
 --------------------
 
-The plugin provides the three Argon2 variants defined in
-`RFC 9106 <https://www.rfc-editor.org/rfc/rfc9106.html>`_:
+The plugin provides the three Argon2 variants defined in `RFC 9106 <https://www.rfc-editor.org/rfc/rfc9106.html>`_:
 
 * ``argon2id`` (recommended)
 * ``argon2i``
 * ``argon2d``
 
-It also provides ``scrypt``, defined in
-`RFC 7914 <https://www.rfc-editor.org/rfc/rfc7914.html>`_.
+It also provides ``scrypt``, defined in `RFC 7914 <https://www.rfc-editor.org/rfc/rfc7914.html>`_.
 
-Password hashes are stored in the standard
-`PHC string format <https://c2sp.org/phc-strings>`_, for example:
+Password hashes are stored in the standard `PHC string format <https://c2sp.org/phc-strings>`_, for example:
 
 .. code-block:: text
 
     $argon2id$v=19$m=65536,t=3,p=1$<salt>$<hash>
     $scrypt$ln=17,r=8,p=1$<salt>$<hash>
 
-This keeps hashes interchangeable with hashes produced by other implementations
-of the same algorithms.
+This keeps hashes interchangeable with hashes produced by other implementations of the same algorithms.
 
 Building the Plugin
 -------------------
 
-Build the plugin by issuing the command ``mvn package``. This will produce a JAR file in the ``target`` directory,
-which can be installed.
+If you want to build the plugin from source, use the command ``mvn package``. This will produce a JAR file in the
+``target`` directory, which you can then install.
 
 Installing the Plugin
 ---------------------
 
-To install the plugin, copy the compiled JAR and JARs of the dependencies not provided by the Curity Identity Server
+To install the plugin, copy the plugin JAR (that you either compiled yourself or unpacked from a downloaded release)
+and JARs of the dependencies not provided by the Curity Identity Server
 from the ``target`` directory into the :file:`${IDSVR_HOME}/usr/share/plugins/hardened-hashing/`. ``${IDSVR_HOME}``
 is the installation folder of the Curity Identity Server. Inside of a Docker container that uses an official image of
-the Curity Identity Server, the installation directory is ``/opt/idsvr``. Make sure to copy the JARs on each node that
-runs the Curity Identity Server, including the admin node. Restart the Curity Identity Server so that it can load the
+the Curity Identity Server, the installation directory is ``/opt/idsvr``. Make sure to copy the JARs to every Curity Identity Server node, including the admin node. Restart the Curity Identity Server so that it can load the
 plugin. For more information about installing plugins, refer to the `curity.io/plugins`_.
 
 Required Dependencies
@@ -60,29 +59,28 @@ Configuring the Plugin
 ----------------------
 
 Install the plugin in the Curity Identity Server (see `Installing the Plugin`_), then create a Password
-Transformer under **Facilities**. Select one of the algorithms provided by the
-plugin and configure its settings. Finally, configure a Credential Manager to use
-that Password Transformer by its ID.
+Transformer under **Facilities**. Select one of the algorithms the plugin provides and configure its settings.
+Finally, configure a Credential Manager to use that Password Transformer by its ID.
 
 Several Credential Managers may share one Password Transformer. In that case,
 they hash credentials identically and share the transformer's configured resource
 limits.
 
-A Password Transformer can be used as the main Credential Manager algorithm and
+You can use a Password Transformer as the main Credential Manager algorithm and
 as a source for credential rehashing, in any combination. This makes it possible
 to migrate stored hashes both onto and off a plugin-provided algorithm.
 
 .. warning::
 
-    When credentials are stored using the JDBC Plugin, the ``password`` column of the ``credentials`` table
-    should be updated to support longer hashes. The default database schema defines that column as::
+    When you store credentials using the JDBC Plugin, update the ``password`` column of the ``credentials`` table
+    to support longer hashes. The default database schema defines that column as::
 
         password    VARCHAR(128) NOT NULL
 
-    Hashes are stored in the PHC string format, with the salt and the hash Base64-encoded, so their length
-    grows with the configured ``salt-length`` and ``hash-length``. With the default settings (a 16-byte salt
+    The plugin stores hashes in the PHC string format, with the salt and the Base64-encoded hash, so their length
+    grows with ``salt-length`` and ``hash-length``. With the default settings (a 16-byte salt
     and a 32-byte hash), an ``argon2id`` hash is about 100 characters long and an ``scrypt`` hash about 90, so
-    both fit in the default column. The column should be widened when:
+    both fit in the default column. You should widen the column when:
 
     * ``salt-length`` and ``hash-length`` together exceed 64 bytes, which produces hashes that may not fit in
       128 characters; or
@@ -98,7 +96,7 @@ to migrate stored hashes both onto and off a plugin-provided algorithm.
 Argon2 Settings
 ~~~~~~~~~~~~~~~
 
-The Argon2 variants allow these settings to be configured:
+The Argon2 variants allows to configure these settings:
 
 * ``memory-cost``
 * ``iterations``
@@ -107,10 +105,12 @@ The Argon2 variants allow these settings to be configured:
 * ``hash-length``
 * ``max-concurrent-operations``
 
+.. image:: images/argon-config.jpg
+
 SCrypt Settings
 ~~~~~~~~~~~~~~~
 
-SCrypt allows these settings to be configured:
+SCrypt allows configuring these settings:
 
 * ``cost-exponent`` — the base-2 logarithm of the ``N`` parameter
 * ``block-size``
@@ -118,6 +118,8 @@ SCrypt allows these settings to be configured:
 * ``salt-length``
 * ``hash-length``
 * ``max-concurrent-operations``
+
+.. image:: images/scrypt-config.jpg
 
 Sizing Argon2 and SCrypt
 ------------------------
@@ -128,9 +130,8 @@ allocates a configuration-determined amount of memory on the Java heap:
 * Argon2 uses ``memory-cost`` kibibytes per hash.
 * SCrypt uses ``128 * block-size * 2^cost-exponent`` bytes per hash.
 
-That memory is needed for every credential verification and every password
-change, not once per server. The heap therefore has to accommodate all hashes
-computed at the same time.
+Every credential verification and every password change need that much memory. This is not a per server setting.
+The heap therefore has to accommodate all hashes computed at the same time.
 
 The ``max-concurrent-operations`` setting bounds this. At most the per-hash
 memory times ``max-concurrent-operations`` is used by a Password Transformer's
@@ -140,11 +141,11 @@ instead of allocating more memory.
 With the defaults, Argon2 uses 64 MiB per hash and allows 8 concurrent
 operations, and SCrypt uses 128 MiB per hash and allows 4 concurrent operations.
 Both defaults therefore allow up to 512 MiB of hashing memory, so the server's
-heap must be sized well above that. Each Password Transformer has its own limit,
+heap size must be well above that. Each Password Transformer has its own limit,
 so totals add up across transformers. Credential Managers sharing a Password
 Transformer share its limit.
 
-The per-hash memory is the configured one only when hashing new passwords.
+The plugin uses the configured per-hash memory only when hashing new passwords.
 Verifying a password uses the cost parameters recorded in the stored hash, not
 the currently configured ones, so that hashes produced with other settings remain
 verifiable and can be rehashed on login. If the credential store holds hashes
@@ -154,16 +155,16 @@ size the heap for their cost times ``max-concurrent-operations``, or lower
 
 Raising ``max-concurrent-operations`` increases how many users can authenticate
 at once, at the cost of memory. Lowering the memory a hash uses reduces the
-memory needed but also makes the hashes easier to crack. Prefer keeping the
-recommended cost and tuning the concurrency.
+memory that the JVM needs but also makes the hashes easier to crack. Prefer keeping the
+recommended cost and tune the concurrency.
 
 FIPS Mode
 ---------
 
-Neither Argon2 nor SCrypt is a FIPS 140-3 approved algorithm. When the Curity
-Identity Server runs in FIPS mode, a Credential Manager configured with a
-Password Transformer from this plugin is rejected, whether as its main algorithm
-or as a rehashing source.
+Neither Argon2 nor SCrypt is a FIPS 140-3-approved algorithm. When the Curity
+Identity Server runs in FIPS mode it will reject a Credential Manager configured with a
+Password Transformer from this plugin. The Curity Identity Server will reject the Credential Manager
+regardless of whether it uses this plugin's transformer as its main algorithm or as a rehashing source.
 
 More Information
 ----------------
