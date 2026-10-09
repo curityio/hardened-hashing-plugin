@@ -87,11 +87,9 @@ to migrate stored hashes both onto and off a plugin-provided algorithm.
     * the credential store holds hashes longer than 128 characters imported from another system.
 
     With the maximum allowed settings, a hash can take up to about 2800 characters. Widen the column
-    accordingly, for example, in PostgreSQL::
-
-        ALTER TABLE credentials ALTER COLUMN password TYPE VARCHAR(4096);
-
-    The exact syntax depends on the database in use.
+    accordingly, by using the Liquibase changeset located in the `db` folder.
+    See the `Upgrade Data Sources <https://curity.io/resources/learn/upgrade-data-sources/>`_ tutorial to
+    learn how to use the Liquibase tool with the Curity Identity Server.
 
 Argon2 Settings
 ~~~~~~~~~~~~~~~
